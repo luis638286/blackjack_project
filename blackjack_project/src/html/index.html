@@ -1,70 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <head>
   <meta charset="UTF-8">
-  <title>Blackjack</title>
+  <title>Blackjack Royale</title>
   <link rel="stylesheet" href="../styling/css/style.css">
 </head>
 
-
 <body>
-  <div id="start-screen">
-    <button id="startBtn">Start Game</button>
-  </div>
   <audio id="bg-music" src="../../assets/sounds/music_iwatodai_dorm.mp3" loop></audio>
   <audio id="card-sound" src="../../assets/sounds/drawing card.mp3"></audio>
   <audio id="mouse-click" src="../../assets/sounds/mouse click.mp3"></audio>
-  <h1>Blackjack</h1>
 
-
-  <div id="game" style="display: none;">
-
-    <!-- dealer -->
-    <div>
-      <h2>Dealer</h2>
-      <div id="dealer-cards" class="hand"></div>
-      <p id="dealer-total"></p>
+  <div id="start-overlay" class="overlay visible">
+    <div class="modal start-modal">
+      <h1>Blackjack Royale</h1>
+      <p>Face off against the house with two high-tech rivals. Adjust the table to your liking and chase 21.</p>
+      <button id="startBtn" class="primary">Take a Seat</button>
     </div>
-
-    <!-- players -->
-    <div class="players">
-
-      <!-- human player -->
-      <div>
-        <h2>Player</h2>
-        <div id="player-cards" class="hand"></div>
-        <p id="player-total"></p>
-      </div>
-
-      <!-- AI player -->
-      <div>
-        <h2 id="ai-title">AI Player (easy)</h2>
-        <div id="ai-player-cards" class="hand"></div>
-        <p id="ai-player-total"></p>
-      </div>
-
-    </div>
-
-    <!-- result + buttons -->
-    <p id="result"></p>
-    <div class="function-buttons">
-      <button id="hitBtn">Hit</button>
-      <button id="standBtn">Stand</button>
-      <!--<button id="restartBtn">Restart</button> -->
-      <button id="restartBtn">Restart</button>
-    </div>
-    <div>
-      <div class="difficulty-buttons">
-        <button id="easyBtn" class="difficulty-btn">Easy</button>
-        <button id="mediumBtn" class="difficulty-btn">Medium</button>
-        <button id="hardBtn" class="difficulty-btn">Hard</button>
-      </div>
-    </div>
-
   </div>
-  <div id="Overlay">
+
+  <header class="top-bar">
+    <div class="title-group">
+      <h1>Blackjack Royale</h1>
+      <span class="subtitle">A polished single-player table with rival AI</span>
+    </div>
+    <div class="header-actions">
+      <button id="settingsBtn" class="icon-button" aria-label="Settings">⚙️</button>
+      <button id="restartBtn" class="icon-button" aria-label="Restart round">⟲</button>
+    </div>
+  </header>
+
+  <main id="game" class="game hidden">
+    <section class="scoreboard">
+      <div class="score-card">
+        <span class="label">Round</span>
+        <span class="value" id="round-number">0</span>
+      </div>
+      <div class="score-card">
+        <span class="label">Wins</span>
+        <span class="value" id="wins-count">0</span>
+      </div>
+      <div class="score-card">
+        <span class="label">Losses</span>
+        <span class="value" id="losses-count">0</span>
+      </div>
+      <div class="score-card">
+        <span class="label">Pushes</span>
+        <span class="value" id="pushes-count">0</span>
+      </div>
+    </section>
+
+    <section class="table">
+      <article class="participant dealer" data-participant="dealer">
+        <div class="participant-header">
+          <img class="avatar" id="dealer-avatar" src="../../assets/images/avatar_dealer.svg" alt="Dealer avatar">
+          <div class="details">
+            <h2 class="name" id="dealer-name">Dealer</h2>
+            <p class="tagline">House stands on 17</p>
+            <p class="total" id="dealer-total">Total: ??</p>
+          </div>
+        </div>
+        <div class="hand" id="dealer-cards"></div>
+      </article>
+
+      <div class="participant-row">
+        <article class="participant focus" data-participant="player">
+          <div class="participant-header">
+            <img class="avatar" id="player-avatar" src="../../assets/images/avatar_player.svg" alt="Player avatar">
+            <div class="details">
+              <h2 class="name" id="player-name">You</h2>
+              <p class="tagline">Human contender</p>
+              <p class="total" id="player-total">Total: 0</p>
+            </div>
+          </div>
+          <div class="hand" id="player-cards"></div>
+        </article>
+
+        <article class="participant" data-participant="ai-1">
+          <div class="participant-header">
+            <img class="avatar" id="ai-1-avatar" src="../../assets/images/avatar_ai1.svg" alt="AI rival avatar">
+            <div class="details">
+              <h2 class="name" id="ai-1-name">Aurora</h2>
+              <p class="tagline" id="ai-1-tagline">Difficulty: easy</p>
+              <p class="total" id="ai-1-total">Total: 0</p>
+            </div>
+          </div>
+          <div class="hand" id="ai-1-cards"></div>
+        </article>
+
+        <article class="participant" data-participant="ai-2">
+          <div class="participant-header">
+            <img class="avatar" id="ai-2-avatar" src="../../assets/images/avatar_ai2.svg" alt="AI rival avatar">
+            <div class="details">
+              <h2 class="name" id="ai-2-name">Orion</h2>
+              <p class="tagline" id="ai-2-tagline">Difficulty: medium</p>
+              <p class="total" id="ai-2-total">Total: 0</p>
+            </div>
+          </div>
+          <div class="hand" id="ai-2-cards"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="action-bar">
+      <p id="result" class="result-banner"></p>
+      <div class="button-row">
+        <button id="hitBtn" class="primary">Hit</button>
+        <button id="standBtn" class="secondary">Stand</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="settings-modal" class="overlay">
+    <div class="modal settings-modal">
+      <h2>Table settings</h2>
+      <form id="settingsForm">
+        <div class="field">
+          <label for="ai1Difficulty">Aurora difficulty</label>
+          <select id="ai1Difficulty" name="ai1Difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ai2Difficulty">Orion difficulty</label>
+          <select id="ai2Difficulty" name="ai2Difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="musicVolume">Music volume</label>
+          <input type="range" id="musicVolume" min="0" max="1" step="0.01">
+        </div>
+        <div class="field checkbox">
+          <input type="checkbox" id="sfxToggle" checked>
+          <label for="sfxToggle">Enable sound effects</label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelSettings" class="ghost">Cancel</button>
+          <button type="submit" class="primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="result-overlay" class="overlay">
+    <div class="modal result-modal">
+      <h2 id="result-heading">Round complete</h2>
+      <p id="result-detail">Ready for the next hand?</p>
+      <button id="result-close" class="primary">Deal next round</button>
+    </div>
   </div>
 
   <script type="module" src="../javascript/main.js"></script>

@@ -1,0 +1,15 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="gradAI1" cx="0.35" cy="0.35" r="0.8">
+      <stop offset="0%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#7e22ce" />
+    </radialGradient>
+  </defs>
+  <circle cx="80" cy="80" r="76" fill="url(#gradAI1)" stroke="#2e1065" stroke-width="8" />
+  <g fill="#fdf4ff" opacity="0.9">
+    <path d="M50 118c6-18 17-26 30-26s24 8 30 26c-10 12-24 20-30 20s-20-8-30-20z" />
+    <circle cx="65" cy="70" r="12" />
+    <circle cx="95" cy="70" r="12" />
+  </g>
+  <text x="80" y="96" font-size="48" text-anchor="middle" fill="#fdf4ff" font-family="'Segoe UI', sans-serif" font-weight="700">A₁</text>
+</svg>
