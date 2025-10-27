@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <title>Blackjack</title>
+  <link rel="stylesheet" href="../styling/css/style.css">
+</head>
+
+
+<body>
+  <div id="start-screen">
+    <button id="startBtn">Start Game</button>
+  </div>
+  <audio id="bg-music" src="../../assets/sounds/music_iwatodai_dorm.mp3" loop></audio>
+  <audio id="card-sound" src="../../assets/sounds/drawing card.mp3"></audio>
+  <audio id="mouse-click" src="../../assets/sounds/mouse click.mp3"></audio>
+  <h1>Blackjack</h1>
+
+
+  <div id="game" style="display: none;">
+
+    <!-- dealer -->
+    <div>
+      <h2>Dealer</h2>
+      <div id="dealer-cards" class="hand"></div>
+      <p id="dealer-total"></p>
+    </div>
+
+    <!-- players -->
+    <div class="players">
+
+      <!-- human player -->
+      <div>
+        <h2>Player</h2>
+        <div id="player-cards" class="hand"></div>
+        <p id="player-total"></p>
+      </div>
+
+      <!-- AI player -->
+      <div>
+        <h2 id="ai-title">AI Player (easy)</h2>
+        <div id="ai-player-cards" class="hand"></div>
+        <p id="ai-player-total"></p>
+      </div>
+
+    </div>
+
+    <!-- result + buttons -->
+    <p id="result"></p>
+    <div class="function-buttons">
+      <button id="hitBtn">Hit</button>
+      <button id="standBtn">Stand</button>
+      <!--<button id="restartBtn">Restart</button> -->
+      <button id="restartBtn">Restart</button>
+    </div>
+    <div>
+      <div class="difficulty-buttons">
+        <button id="easyBtn" class="difficulty-btn">Easy</button>
+        <button id="mediumBtn" class="difficulty-btn">Medium</button>
+        <button id="hardBtn" class="difficulty-btn">Hard</button>
+      </div>
+    </div>
+
+  </div>
+  <div id="Overlay">
+  </div>
+
+  <script type="module" src="../javascript/main.js"></script>
+</body>
+
+</html>

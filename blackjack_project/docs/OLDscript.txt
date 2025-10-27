@@ -1,0 +1,322 @@
+let playerHand, dealerHand, aiHand;
+
+const suits = ["clubs", "diamonds", "hearts", "spades"];
+
+function drawCard() {
+   cardSound()
+  let rank = Math.floor(Math.random() * 13) + 1; // 1–13
+  let suit = suits[Math.floor(Math.random() * suits.length)];
+  return { rank, suit };
+}
+
+function cardValue(card) {
+  if (card.rank > 10) return 10;   // J, Q, K
+  if (card.rank === 1) return 11;  // ace = 11 by default
+  return card.rank;
+}
+
+
+function handValue(hand) {
+  let value = 0;
+  let aces = 0;
+  for (let card of hand) {
+    value += cardValue(card);
+    if (card.rank === 1) aces++;
+  }
+  while (value > 21 && aces > 0) {
+    value -= 10; // make Ace worth 1 instead of 11
+    aces--;
+  }
+  return value;
+}
+
+
+function cardImage(card) {
+  let rankName;
+  if (card.rank === 1) rankName = "A";
+  else if (card.rank === 11) rankName = "J";
+  else if (card.rank === 12) rankName = "Q";
+  else if (card.rank === 13) rankName = "K";
+  else rankName = card.rank;
+
+  const path = `../../assets/images/deck/${card.suit}_${rankName}.png`;
+  //console.log("Card image path:", path);   debug
+  return path;
+}
+
+
+function renderHand(hand, containerId, totalId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  hand.forEach(card => {
+    let img = document.createElement("img");
+    img.src = cardImage(card);
+    container.appendChild(img);
+  });
+  document.getElementById(totalId).innerText = "Total: " + handValue(hand);
+}
+
+
+function updateDisplay() {
+  renderHand(playerHand, "player-cards", "player-total");
+  renderHand(aiHand, "ai-player-cards", "ai-player-total");
+  renderHand(dealerHand, "dealer-cards", "dealer-total");
+}
+
+
+function checkEnd() {
+  if (handValue(playerHand) > 21) {
+    document.getElementById("result").innerText = "Player busts! Dealer wins.";
+    disableButtons();
+    return true;
+  }
+  return false;
+}
+
+
+function hit() {
+  playerHand.push(drawCard());
+  console.log("Player used hit")
+  updateDisplay();
+  checkEnd();
+}
+
+
+function stand() {
+  console.log("Player used stand")
+  while (handValue(dealerHand) < 17) {
+    dealerHand.push(drawCard());
+  }
+
+  runAI_difficulty()
+
+  updateDisplay();
+
+  let playerVal = handValue(playerHand);
+  let dealerVal = handValue(dealerHand);
+  let aiVal = handValue(aiHand)
+ // let result = "";
+
+function winnerUpTo21(name, val, currentWinner) {
+  if (val > 21) return currentWinner; // busted, ignore
+  if (!currentWinner || val > currentWinner.value) {
+    return { names: [name], value: val };
+  }
+  if (val === currentWinner.value) {
+    currentWinner.names.push(name); // add to tie list
+  }
+  return currentWinner;
+}
+
+let winner = null;
+winner = winnerUpTo21("Player", playerVal, winner);
+winner = winnerUpTo21("Dealer", dealerVal, winner);
+winner = winnerUpTo21("AI", aiVal, winner);
+
+console.log(winner)
+
+let result = "";
+if (!winner) {
+  result = "Nobody wins (all busted)";
+} else if (winner.names.length > 1) {
+  result = "It's a tie between " + winner.names.join(" and ") + " with " + winner.value;
+} else {
+  result = winner.names[0] + " wins with " + winner.value;
+}
+
+  document.getElementById("result").innerText = result;
+  disableButtons();
+}
+
+
+function runAI_difficulty() {
+  let dealerValue = cardValue(dealerHand[0]); // dealer’s first card
+
+  if (currentDifficulty === "easy") {
+    easyMode(aiHand, dealerValue);
+  } else if (currentDifficulty === "medium") {
+    mediumMode(aiHand, dealerValue);
+  } else if (currentDifficulty === "hard") {
+    hardMode(aiHand, dealerValue);
+  }
+  console.log("Current difficulty: ", (currentDifficulty))
+}
+
+
+let currentDifficulty = "easy"
+
+function easyMode(aiHand, dealerValue) {
+  let aiTotal = handValue(aiHand);
+  let decision;
+
+  if (aiTotal >= 17) {
+    decision = Math.random() < 0.8 ? "hit" : "stand"; // high chance to hit high
+  } else if (aiTotal <= 11) {
+    decision = "hit";
+  } else if (aiTotal === 12 || aiTotal === 13) {
+    decision = Math.random() < 0.8 ? "stand" : "hit"; // stands too early
+  } else if (aiTotal >= 12 && aiTotal <= 16 && dealerValue >= 2 && dealerValue <= 6) {
+    decision = Math.random() < 0.8 ? "hit" : "stand"; // sometimes wrong
+  } else {
+    decision = aiTotal <= 15 ? "hit" : "stand";
+  }
+
+  if (decision === "hit") aiHand.push(drawCard()),  console.log("AI chose HIT (Easy)");
+  console.log("AI chose STAND (Easy)")
+}
+
+
+function mediumMode(aiHand, dealerValue) {
+  let aiTotal = handValue(aiHand);
+  let decision;
+
+  if (dealerValue >= 7 || dealerValue === 11) {
+    decision = aiTotal <= 16 ? "hit" : "stand";
+  } else {
+    decision = aiTotal >= 12 ? "stand" : "hit";
+  }
+
+  // 15% chance to flip decision (mistake)
+  if (Math.random() < 0.15) {
+    decision = decision === "hit" ? "stand" : "hit";
+  }
+
+  if (decision === "hit") aiHand.push(drawCard()), console.log("AI chose HIT (Medium)");
+  console.log("AI chose STAND (Hard)")
+}
+
+
+
+function hardMode(aiHand, dealerValue) {
+  let aiTotal = handValue(aiHand);
+
+  // helper: check if hand is soft (ace counted as 11)
+  let soft = false;
+  let value = 0, aces = 0;
+  for (let card of aiHand) {
+    value += cardValue(card);
+    if (card.rank === 1) aces++;
+  }
+  while (value > 21 && aces > 0) {
+    value -= 10;
+    aces--;
+  }
+  if (aces > 0 && value <= 21) {
+    soft = true;
+  }
+
+  let decision;
+
+  if (!soft) {
+    // hard totals
+    if (aiTotal <= 11) {
+      decision = "hit";
+    } else if (aiTotal >= 17) {
+      decision = "stand";
+    } else {
+      decision = (dealerValue >= 2 && dealerValue <= 6) ? "stand" : "hit"; // 12–16
+    }
+  } else {
+    // soft totals
+    if (aiTotal >= 19) {
+      decision = "stand"; // soft 19+
+    } else {
+      decision = (dealerValue >= 7) ? "hit" : "stand"; // soft 13–18
+    }
+  }
+
+  if (decision === "hit") {
+    aiHand.push(drawCard());
+    console.log("AI chose HIT (Hard Mode)");
+  } else {
+    console.log("AI chose STAND (Hard Mode)");
+  }
+}
+
+
+
+function disableButtons() {
+  document.getElementById("hitBtn").disabled = true;
+  document.getElementById("standBtn").disabled = true;
+}
+
+function restart() {
+  console.log("Game started!")
+  aiHand = [drawCard(), drawCard()];
+  playerHand = [drawCard(), drawCard()];
+  dealerHand = [drawCard()];
+  document.getElementById("result").innerText = "";
+  updateDisplay();
+  document.getElementById("hitBtn").disabled = false;
+  document.getElementById("standBtn").disabled = false;
+}
+
+function cardSound() {
+  const original = document.getElementById("card-sound");
+  const clone = original.cloneNode(true); 
+  clone.volume = 1;
+  clone.play();
+}
+
+function clickSound() {
+  const original = document.getElementById("mouse-click");
+  const clone = original.cloneNode(true); 
+  clone.volume = 0.25;
+  clone.play();
+}
+
+
+function startGame() {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("game").style.display = "block";
+
+  const music = document.getElementById("bg-music");
+  music.volume = 0.1;
+  music.play()
+
+  // deal initial cards
+  restart();
+}
+
+
+document.getElementById("startBtn").onclick = startGame;
+document.getElementById("hitBtn").onclick = hit;
+document.getElementById("standBtn").onclick = stand;
+document.getElementById("restartBtn").onclick = restart;
+document.getElementById("easyBtn").classList.add("selected");
+
+
+document.getElementById("easyBtn").onclick = () => {
+  currentDifficulty = "easy";
+  console.log("Difficulty set to:", currentDifficulty); setDifficulty("easy")
+  document.getElementById("ai-title").textContent = "AI Player (easy)";
+  clickSound()
+};
+document.getElementById("mediumBtn").onclick = () => {
+  currentDifficulty = "medium";
+  console.log("Difficulty set to:", currentDifficulty); setDifficulty("medium")
+   document.getElementById("ai-title").textContent = "AI Player (medium)";
+   clickSound()
+};
+document.getElementById("hardBtn").onclick = () => {
+  currentDifficulty = "hard";
+  console.log("Difficulty set to:", currentDifficulty); setDifficulty("hard")
+    document.getElementById("ai-title").textContent = "AI Player (hard)"; 
+    clickSound()
+}; 
+
+
+
+function setDifficulty(difficulty) {
+  currentDifficulty = difficulty;
+  console.log("Difficulty set to:", difficulty);
+
+  // reset all to red
+  document.querySelectorAll(".difficulty-btn").forEach(btn => {
+    btn.classList.remove("selected");
+  });
+
+  // make the chosen one green
+  document.getElementById(difficulty + "Btn").classList.add("selected");
+}
+

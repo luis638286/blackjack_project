@@ -1,0 +1,101 @@
+let deck, playerHand, dealerHand;
+
+function newDeck() {
+  let deck = [];
+  for (let i = 1; i <= 13; i++) {
+    for (let j = 0; j < 4; j++) {
+      deck.push(i);
+    }
+  }
+  return deck;
+}
+
+function drawCard() {
+  return deck.splice(Math.floor(Math.random() * deck.length), 1)[0];
+}
+
+function cardValue(card) {
+  if (card > 10) return 10; // J, Q, K
+  if (card === 1) return 11; // Ace
+  return card;
+}
+
+function handValue(hand) {
+  let value = 0;
+  let aces = 0;
+  for (let card of hand) {
+    value += cardValue(card);
+    if (card === 1) aces++;
+  }
+  while (value > 21 && aces > 0) {
+    value -= 10;
+    aces--;
+  }
+  return value;
+}
+
+function updateDisplay() {
+  document.getElementById("player").innerText =
+    "Player: " + playerHand.join(", ") + " (Total: " + handValue(playerHand) + ")";
+  document.getElementById("dealer").innerText =
+    "Dealer: " + dealerHand.join(", ") + " (Total: " + handValue(dealerHand) + ")";
+}
+
+function checkEnd() {
+  let playerVal = handValue(playerHand);
+  if (playerVal > 21) {
+    document.getElementById("result").innerText = "Player busts! Dealer wins.";
+    disableButtons();
+    return true;
+  }
+  return false;
+}
+
+function hit() {
+  playerHand.push(drawCard());
+  updateDisplay();
+  checkEnd();
+}
+
+function stand() {
+  while (handValue(dealerHand) < 17) {
+    dealerHand.push(drawCard());
+  }
+  updateDisplay();
+  let playerVal = handValue(playerHand);
+  let dealerVal = handValue(dealerHand);
+  let result = "";
+  if (dealerVal > 21 || playerVal > dealerVal) {
+    result = "Player wins!";
+  } else if (dealerVal > playerVal) {
+    result = "Dealer wins!";
+  } else {
+    result = "It's a tie!";
+  }
+  document.getElementById("result").innerText = result;
+  disableButtons();
+}
+
+
+function disableButtons() {
+  document.getElementById("hitBtn").disabled = true;
+  document.getElementById("standBtn").disabled = true;
+}
+
+
+function restart() {
+  deck = newDeck();
+  playerHand = [drawCard(), drawCard()];
+  dealerHand = [drawCard()];
+  document.getElementById("result").innerText = "";
+  updateDisplay();
+  document.getElementById("hitBtn").disabled = false;
+  document.getElementById("standBtn").disabled = false;
+}
+
+
+document.getElementById("hitBtn").onclick = hit;
+document.getElementById("standBtn").onclick = stand;
+document.getElementById("restartBtn").onclick = restart;
+
+restart();
